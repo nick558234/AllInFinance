@@ -13,9 +13,11 @@
             <p>Current Value: {{ asset.current_value }}</p>
             <p>Purchase Price: {{ asset.purchase_price }}</p>
             <p>Category ID: {{ asset.category_id }}</p>
-            <hr />
-            <Bitcoin v-if="asset.name.toLowerCase() === 'bitcoin'" />
-          </div>
+            <CryptoPrices v-if="['bitcoin', 'ethereum', 'xrp', 'solana', 'tether', 'bnb'].includes(asset.name.toLowerCase())" :cryptoName="asset.name.toLowerCase()" />
+       <hr /> 
+        </div>
+          
+
         </div>
         <div v-else>
           <p>Geen assets gevonden.</p>
@@ -30,7 +32,7 @@ import { ref, computed, onMounted } from 'vue'
 import { useRuntimeConfig } from '#app'
 import Aside from '~/components/Aside.vue'
 import Header from '~/components/Header.vue'
-import Bitcoin from '~/components/Bitcoin.vue'
+import CryptoPrices from '~/components/CryptoPrices.vue'
 import { useCategory } from '~/composables/useCategory'
 
 const config = useRuntimeConfig()
