@@ -40,13 +40,12 @@ const chartOptions = ref({
     }
   }
 })
-
 const fetchCryptoPrice = async (cryptoName) => {
   try {
     const response = await axios.get(`https://api.coingecko.com/api/v3/coins/${cryptoName}/market_chart`, {
       params: {
         vs_currency: 'eur',
-        days: '7'
+        days: '3' // Adjusted to match the working URL
       }
     })
     const prices = response.data.prices.map(price => ({
@@ -57,7 +56,7 @@ const fetchCryptoPrice = async (cryptoName) => {
       labels: prices.map(price => price.x),
       datasets: [
         {
-          label: `${cryptoName | capitalize} Price in EUR`,
+          label: `${cryptoName.charAt(0).toUpperCase() + cryptoName.slice(1)} Price in EUR`,
           data: prices,
           borderColor: 'rgba(75, 192, 192, 1)',
           backgroundColor: 'rgba(75, 192, 192, 0.2)',
@@ -69,7 +68,6 @@ const fetchCryptoPrice = async (cryptoName) => {
     console.error(`Error fetching ${cryptoName} price:`, error)
   }
 }
-
 watch(() => props.cryptoName, (newCryptoName) => {
   fetchCryptoPrice(newCryptoName)
 })
