@@ -11,10 +11,8 @@
             <p class="text-xl">{{ totalPrice.toFixed(2) }}</p>
           </div>
           <div class="w-3/4 p-4 border rounded shadow">
-            <!-- Conditionally render CryptoPrices component -->
             <CryptoPrices v-if="selectedCategory === 1" class="h-96" :cryptoName="selectedCrypto" @update:latestPrice="updateLatestPrice" />
-            <!-- Conditionally render Vastgoed component -->
-            <Vastgoed v-if="selectedCategory === 2" class="h-96" />
+            <Vastgoed v-if="selectedCategory === 2" class="h-96" :vastgoedName="selectedCrypto" />
           </div>
         </div>
         <div class="flex-1">
@@ -71,16 +69,20 @@ import CryptoPrices from '~/components/CryptoPrices.vue'
 import Vastgoed from '~/components/Vastgoed.vue'
 import { useCategory } from '~/composables/useCategory'
 
-const config = useRuntimeConfig()
+// State variables
 const assets = ref([])
 
 const selectedCrypto = ref(null)
+const selectedVastgoed = ref(null)
 const latestPrices = ref({})
 const selectedComponent = ref(null)
 
+
+// Category selection
 const { selectedCategory } = useCategory()
 
-// Fetch data using useAsyncData to ensure SSR compatibility
+// Fetch assets data
+const config = useRuntimeConfig()
 const getAssets = async () => {
   try {
     const data = await $fetch(`${config.public.apiUrl}/assets`)
@@ -91,13 +93,22 @@ const getAssets = async () => {
   }
 }
 
+
+// function to get the asset of vastgoed with config.public.apiUrl
+const getVastgoed = async () => {
+  try {
+    const data = await $fetch(`${config.public.apiUrl}/asset`)
+    assets.value = data
+  } catch (error) {
+    console.error('Error fetching assets:', error)
+    assets.value = [] // Ensure assets is always an array
+  }
+}
+
+// Computed properties
 const filteredAssets = computed(() => {
-  if (!assets.value) {
-    return []
-  }
-  if (!selectedCategory.value) {
-    return assets.value
-  }
+  if (!assets.value) return []
+  if (!selectedCategory.value) return assets.value
   return assets.value.filter(asset => asset.category_id === selectedCategory.value)
 })
 
@@ -108,8 +119,13 @@ const totalPrice = computed(() => {
   }, 0)
 })
 
+
 const selectCrypto = (cryptoName) => {
   selectedCrypto.value = cryptoName
+}
+
+const selectVastgoed = (vastgoedName) => {
+  selectedVastgoed.value = vastgoedName
 }
 
 const updateLatestPrice = (price) => {
@@ -118,6 +134,11 @@ const updateLatestPrice = (price) => {
 
 const getCurrentPrice = (cryptoName) => {
   const currentPrice = latestPrices.value[cryptoName]
+  return currentPrice !== undefined ? currentPrice : Math.random() * 100
+}
+
+const getCurrentPriceVastgoed = (vastgoedName) => {
+  const currentPrice = latestPrices.value[vastgoedName]
   return currentPrice !== undefined ? currentPrice : Math.random() * 100
 }
 
@@ -130,6 +151,7 @@ const handleSelect = (component) => {
   selectedComponent.value = component
 }
 
+// Lifecycle hooks
 onMounted(() => {
   getAssets()
 })

@@ -1,5 +1,7 @@
 <template>
   <div>
+    <h1 class="text-4xl font-semibold">{{ cryptoName  }}</h1>
+
     <h2>Real Estate Prices</h2>
     <div  v-if="chartData">
     <line-chart :chart-data="chartData" :options="chartOptions"></line-chart>
@@ -20,6 +22,13 @@ import { ref, onMounted } from 'vue';
 import axios from 'axios';
 import { Line } from 'vue-chartjs';
 import { Chart as ChartJS, Title, Tooltip, Legend, LineElement, CategoryScale, LinearScale, PointElement } from 'chart.js';
+
+const props = defineProps({
+  cryptoName: {
+    type: Object,
+    required: true
+  }
+})
 
 ChartJS.register(Title, Tooltip, Legend, LineElement, CategoryScale, LinearScale, PointElement);
 
