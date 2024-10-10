@@ -1,5 +1,4 @@
 <template>
-  {{ selectedCategory }}
   <div class="flex h-screen">
     <Aside class="w-64" />
     <div class="flex flex-col flex-1">
