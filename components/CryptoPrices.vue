@@ -1,8 +1,19 @@
 <template>
   <div>
-    <h1 class="text-4xl font-semibold">{{ cryptoName  }}</h1>
+    <h1 class="text-4xl font-semibold">{{ cryptoName }}</h1>
     <p v-if="latestPrice">Latest Price: €{{ latestPrice }} EUR</p>
-    <line-chart v-if="chartData" :chart-data="chartData" :options="chartOptions"></line-chart>
+    <div v-if="chartData" class="p-4 rounded-lg shadow-md bg-gray-100">
+      <p v-if="isMarketCrashing" class="text-red-600 font-bold flex items-center">
+        <i class="fas fa-exclamation-triangle mr-2"></i> Market is crashing!
+      </p>
+      <p v-else-if="isGoodToBuy" class="text-green-600 font-bold flex items-center">
+        <i class="fas fa-thumbs-up mr-2"></i> Good time to buy!
+      </p>
+      <p v-else class="text-red-600 font-bold flex items-center">
+        <i class="fas fa-thumbs-down mr-2"></i> Not a good time to buy.
+      </p>
+    </div>
+    <line-chart class="pb-8" v-if="chartData" :chart-data="chartData" :options="chartOptions"></line-chart>
     <p v-else>Loading...</p>
   </div>
 </template>
@@ -26,6 +37,8 @@ const emit = defineEmits(['update:latestPrice'])
 
 const chartData = ref(null)
 const latestPrice = ref(null)
+const isGoodToBuy = ref(false)
+const isMarketCrashing = ref(false)
 const chartOptions = ref({
   responsive: true,
   maintainAspectRatio: false,
@@ -52,11 +65,30 @@ const chartOptions = ref({
 })
 const cache = new Map()
 
+const analyzeData = (prices) => {
+  if (prices.length < 2) {
+    isGoodToBuy.value = false
+    isMarketCrashing.value = false
+    return
+  }
+
+  // Simple analysis: if the latest price is lower than the average price of the last 3 days, it's a good time to buy
+  const averagePrice = prices.reduce((sum, price) => sum + price.y, 0) / prices.length
+  isGoodToBuy.value = latestPrice.value < averagePrice
+
+  // Check if the market is crashing: if the price has dropped more than 20% in the last day
+  const latestPriceValue = prices[prices.length - 1].y
+  const previousPrice = prices[prices.length - 2].y
+  const priceDrop = ((previousPrice - latestPriceValue) / previousPrice) * 100
+  isMarketCrashing.value = priceDrop > 20
+}
+
 const fetchCryptoPrice = async (cryptoName) => {
   if (cache.has(cryptoName)) {
     const cachedData = cache.get(cryptoName)
     chartData.value = cachedData.chartData
     latestPrice.value = cachedData.latestPrice
+    analyzeData(cachedData.chartData.datasets[0].data)
     emit('update:latestPrice', latestPrice.value)
     return
   }
@@ -86,6 +118,7 @@ const fetchCryptoPrice = async (cryptoName) => {
     }
     chartData.value = data
     latestPrice.value = prices[prices.length - 1].y
+    analyzeData(prices)
     emit('update:latestPrice', latestPrice.value)
     cache.set(cryptoName, { chartData: data, latestPrice: latestPrice.value })  // Store in cache
   } catch (error) {
@@ -95,6 +128,7 @@ const fetchCryptoPrice = async (cryptoName) => {
         const cachedData = cache.get(cryptoName)
         chartData.value = cachedData.chartData
         latestPrice.value = cachedData.latestPrice
+        analyzeData(cachedData.chartData.datasets[0].data)
         emit('update:latestPrice', latestPrice.value)
       } else {
         console.error(`No cached data available for ${cryptoName}`)
@@ -112,18 +146,6 @@ watch(() => props.cryptoName, (newCryptoName) => {
 onMounted(() => {
   fetchCryptoPrice(props.cryptoName)
 })
-</script>
-
-<script>
-export default {
-  filters: {
-    capitalize(value) {
-      if (!value) return ''
-      value = value.toString()
-      return value.charAt(0).toUpperCase() + value.slice(1)
-    }
-  }
-}
 </script>
 
 <style scoped>
