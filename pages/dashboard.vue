@@ -12,6 +12,7 @@
           <div class="w-3/4 p-4 border rounded shadow">
             <CryptoPrices v-if="selectedCategory === 1" class="h-96" :cryptoName="selectedCrypto" @update:latestPrice="updateLatestPrice" />
             <Vastgoed v-if="selectedCategory === 2" class="h-96" :vastgoedName="selectedCrypto" />
+            <Nobles v-if="selectedCategory === 3" />
           </div>
         </div>
         <div class="flex-1">
@@ -57,6 +58,7 @@
       </div>
     </div>
   </div>
+
 </template>
 
 <script setup>

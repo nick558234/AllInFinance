@@ -1,6 +1,6 @@
 <template>
   <div>
-    <h2>Metal Prices</h2>
+    <h2>Metal Prices in troy aunts</h2>
     <p v-if="goldPrice !== null">Current Gold Price (XAU to EUR): {{ goldPrice.toFixed(2) }} EUR</p>
     <p v-if="silverPrice !== null">Current Silver Price (XAG to EUR): {{ silverPrice.toFixed(2) }} EUR</p>
     <p v-if="platinumPrice !== null">Current Platinum Price (XPT to EUR): {{ platinumPrice.toFixed(2) }} EUR</p>
@@ -22,7 +22,7 @@ const fetchMetalPrices = async () => {
   try {
     const response = await axios.get('https://api.metalpriceapi.com/v1/latest', {
       params: {
-        // api_key: '08dbdf40f26b1408208aa0584a9e6bf6',  // Replace with your actual API key
+        api_key: '08dbdf40f26b1408208aa0584a9e6bf6',  // Replace with your actual API key
         base: 'EUR', // Base currency
         currencies: 'XAU,XAG,XPT,XPD' // Get the prices of Gold, Silver, Platinum, and Palladium in EUR
       }
