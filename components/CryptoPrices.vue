@@ -27,11 +27,13 @@
         <i class="fas fa-thumbs-down mr-2"></i> Not a good time to buy.
       </p>
       <p v-if="isGoodToBuy" class="text-gray-700">
-        The current price is lower than the average price of the last 3 days,
+        The current price (€{{ latestPrice.toFixed(2) }}) is lower than the
+        average price of the last 3 days (€{{ averagePrice.toFixed(2) }}),
         indicating a potential buying opportunity.
       </p>
       <p v-else class="text-gray-700">
-        The current price is higher than the average price of the last 3 days,
+        The current price (€{{ latestPrice.toFixed(2) }}) is higher than the
+        average price of the last 3 days (€{{ averagePrice.toFixed(2) }}),
         indicating it may not be a good time to buy.
       </p>
       <p v-if="isMarketCrashing" class="mt-2 text-gray-700">
@@ -85,6 +87,7 @@ const emit = defineEmits(["update:latestPrice"]);
 
 const chartData = ref(null);
 const latestPrice = ref(null);
+const averagePrice = ref(null);
 const isGoodToBuy = ref(false);
 const isMarketCrashing = ref(false);
 const chartOptions = ref({
@@ -124,9 +127,9 @@ const analyzeData = (prices) => {
   }
 
   // Simple analysis: if the latest price is lower than the average price of the last 3 days, it's a good time to buy
-  const averagePrice =
+  averagePrice.value =
     prices.reduce((sum, price) => sum + price.y, 0) / prices.length;
-  isGoodToBuy.value = latestPrice.value < averagePrice;
+  isGoodToBuy.value = latestPrice.value < averagePrice.value;
 
   // Check if the market is crashing: if the price has dropped more than 20% in the last day
   const latestPriceValue = prices[prices.length - 1].y;
